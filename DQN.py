@@ -9,6 +9,7 @@ import scipy.misc
 import os
 
 from gridworld import gameEnv
+from replay_buffer import experience_buffer
 
 env = gameEnv(partial=False, size=5)
 
@@ -68,25 +69,6 @@ class Qnetwork():
         self.updateModel = self.trainer.minimize(self.loss)
 
 
-class experience_buffer():
-    # np.array([s, a, r, s1, d]
-    # s is the observation/state, to feed scalarInput
-    # a is the action to take, to feed actions
-    # r is the reward
-    # s1 is the new state/observation after take action a, to feed targetQ
-    # d is to mark done or not
-    def __init__(self, buffer_size=50000):
-        self.buffer = []
-        self.buffer_size = buffer_size
-
-    def add(self, experience):
-        if len(self.buffer) + len(experience) >= self.buffer_size:
-            self.buffer[0:(len(experience) + len(self.buffer)) - self.buffer_size] = []
-        self.buffer.extend(experience)
-
-    def sample(self, size):
-        return np.reshape(np.array(random.sample(self.buffer, size)), [size, 5])
-
 def processState(states, reshape_size):
     return np.reshape(states,[reshape_size])
 
@@ -131,6 +113,13 @@ trainables = tf.trainable_variables()
 targetOps = updateTargetGraph(trainables, tau)
 
 myBuffer = experience_buffer()
+# np.array([s, a, r, s1, d]
+# s is the observation/state, to feed scalarInput
+# a is the action to take, to feed actions
+# r is the reward
+# s1 is the new state/observation after take action a, to feed targetQ
+# d is to mark done or not
+
 
 #Set the rate of random action decrease.
 e = startE
